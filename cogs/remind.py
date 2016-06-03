@@ -15,6 +15,9 @@ class Mycog:
         # Your code will go here
         await self.bot.say(user.mention + ctx.message.author + text)
 
+    async def parse(self, string: str):
+        await self.bot.say(string)
+
 
 def setup(bot):
     bot.add_cog(Mycog(bot))
