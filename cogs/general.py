@@ -1,3 +1,5 @@
+import os
+
 import discord
 from discord.ext import commands
 from random import randint
@@ -6,6 +8,7 @@ import datetime
 import time
 import aiohttp
 import asyncio
+import ipgetter
 
 settings = {"POLL_DURATION" : 60}
 
@@ -25,6 +28,11 @@ class General:
     async def ping(self):
         """Pong."""
         await self.bot.say("Pong.")
+
+    @commands.command()
+    async def ip(self):
+        """Prints IP of the aircraft-carrier"""
+        await self.bot.say(ipgetter.myip())
 
     @commands.command()
     async def choose(self, *choices):
@@ -197,7 +205,7 @@ class General:
         data += "Icon: {}\n".format(server.icon_url)
         data += "```"
         await self.bot.say(data)
-        
+
     @commands.command()
     async def urban(self, *, search_terms : str):
         """Urban Dictionary search"""
