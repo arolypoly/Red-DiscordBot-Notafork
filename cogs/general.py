@@ -9,8 +9,10 @@ import time
 import aiohttp
 import asyncio
 import ipgetter
+import json
 
-settings = {"POLL_DURATION" : 60}
+settings = {"POLL_DURATION": 60}
+
 
 class General:
     """General commands."""
@@ -19,7 +21,8 @@ class General:
         self.bot = bot
         self.stopwatches = {}
         self.ball = ["As I see it, yes", "It is certain", "It is decidedly so", "Most likely", "Outlook good",
-                     "Signs point to yes", "Without a doubt", "Yes", "Yes – definitely", "You may rely on it", "Reply hazy, try again",
+                     "Signs point to yes", "Without a doubt", "Yes", "Yes – definitely", "You may rely on it",
+                     "Reply hazy, try again",
                      "Ask again later", "Better not tell you now", "Cannot predict now", "Concentrate and ask again",
                      "Don't count on it", "My reply is no", "My sources say no", "Outlook not so good", "Very doubtful"]
         self.poll_sessions = []
@@ -28,6 +31,51 @@ class General:
     async def ping(self):
         """Pong."""
         await self.bot.say("Pong.")
+
+    @commands.command()
+    async def andrewinit(self):
+        await self.bot.say("yes")
+        data = {"axe": 0, "pick": 0, "shovel": 0, "hoe": 0, "hotpocket": 0}
+        await self.bot.say(os.getcwd())
+        with open('andrew.text', 'w') as outfile:
+            json.dump(data, outfile)
+        await self.bot.say(data)
+
+    @commands.command()
+    async def andrew(self, type: str):
+        if type.lower() == "axe":
+            with open('andrew.text') as infile:
+                data = json.load(infile)
+                data["axe"] += 1
+            with open('andrew.text', 'w') as outfile:
+                json.dump(data, outfile)
+        elif type.lower() == "pick":
+            with open('andrew.text') as infile:
+                data = json.load(infile)
+                data["axe"] += 1
+            with open('andrew.text', 'w') as outfile:
+                json.dump(data, outfile)
+        elif type.lower() == "shovel":
+            with open('andrew.text') as infile:
+                data = json.load(infile)
+                data["axe"] += 1
+            with open('andrew.text', 'w') as outfile:
+                json.dump(data, outfile)
+        elif type.lower() == "hoe":
+            with open('andrew.text') as infile:
+                data = json.load(infile)
+                data["axe"] += 1
+            with open('andrew.text', 'w') as outfile:
+                json.dump(data, outfile)
+        elif type.lower() == "hotpocket":
+            with open('andrew.text') as infile:
+                data = json.load(infile)
+                data["hotpocket"] += 1
+            with open('andrew.text', 'w') as outfile:
+                json.dump(data, outfile)
+        else:
+            with open('andrew.text') as infile:
+                await self.bot.say(json.load(infile))
 
     @commands.command()
     async def ip(self):
@@ -46,7 +94,7 @@ class General:
             await self.bot.say(randchoice(choices))
 
     @commands.command(pass_context=True)
-    async def roll(self, ctx, number : int = 100):
+    async def roll(self, ctx, number: int = 100):
         """Rolls random number (between 1 and user choice)
 
         Defaults to 100.
@@ -59,7 +107,7 @@ class General:
             return await self.bot.say("{} Maybe higher than 1? ;P".format(author.mention))
 
     @commands.command(pass_context=True)
-    async def flip(self, ctx, user : discord.Member=None):
+    async def flip(self, ctx, user: discord.Member = None):
         """Flips a coin... or a user.
 
         Defaults to coin.
@@ -82,12 +130,12 @@ class General:
             return await self.bot.say("*flips a coin and... " + randchoice(["HEADS!*", "TAILS!*"]))
 
     @commands.command(pass_context=True)
-    async def rps(self, ctx, choice : str):
+    async def rps(self, ctx, choice: str):
         """Play rock paper scissors"""
         author = ctx.message.author
-        rpsbot = {"rock" : ":moyai:",
-           "paper": ":page_facing_up:",
-           "scissors":":scissors:"}
+        rpsbot = {"rock": ":moyai:",
+                  "paper": ":page_facing_up:",
+                  "scissors": ":scissors:"}
         choice = choice.lower()
         if choice in rpsbot.keys():
             botchoice = randchoice(list(rpsbot.keys()))
@@ -139,13 +187,13 @@ class General:
             self.stopwatches.pop(author.id, None)
 
     @commands.command()
-    async def lmgtfy(self, *, search_terms : str):
+    async def lmgtfy(self, *, search_terms: str):
         """Creates a lmgtfy link"""
         search_terms = search_terms.replace(" ", "+")
         await self.bot.say("http://lmgtfy.com/?q={}".format(search_terms))
 
     @commands.command(no_pm=True, hidden=True)
-    async def hug(self, user : discord.Member, intensity : int=1):
+    async def hug(self, user: discord.Member, intensity: int = 1):
         """Because everyone likes hugs
 
         Up to 10 intensity levels."""
@@ -163,7 +211,7 @@ class General:
         await self.bot.say(msg)
 
     @commands.command(pass_context=True, no_pm=True)
-    async def info(self, ctx, user : discord.Member = None):
+    async def info(self, ctx, user: discord.Member = None):
         """Shows users's informations"""
         author = ctx.message.author
         if not user:
@@ -207,7 +255,7 @@ class General:
         await self.bot.say(data)
 
     @commands.command()
-    async def urban(self, *, search_terms : str):
+    async def urban(self, *, search_terms: str):
         """Urban Dictionary search"""
         search_terms = search_terms.split(" ")
         search_terms = "+".join(search_terms)
@@ -218,7 +266,7 @@ class General:
             if result["list"] != []:
                 definition = result['list'][0]['definition']
                 example = result['list'][0]['example']
-                await self.bot.say("**Definition:** " + definition + "\n\n" + "**Example:** " + example )
+                await self.bot.say("**Definition:** " + definition + "\n\n" + "**Example:** " + example)
             else:
                 await self.bot.say("Your search terms gave no results.")
         except:
@@ -253,7 +301,7 @@ class General:
     async def endpoll(self, message):
         if self.getPollByChannel(message):
             p = self.getPollByChannel(message)
-            if p.author == message.author.id: # or isMemberAdmin(message)
+            if p.author == message.author.id:  # or isMemberAdmin(message)
                 await self.getPollByChannel(message).endPoll()
             else:
                 await self.bot.say("Only admins and the author can stop the poll.")
@@ -269,7 +317,7 @@ class General:
     async def check_poll_votes(self, message):
         if message.author.id != self.bot.user.id:
             if self.getPollByChannel(message):
-                    self.getPollByChannel(message).checkAnswer(message)
+                self.getPollByChannel(message).checkAnswer(message)
 
 
 class NewPoll():
@@ -280,7 +328,7 @@ class NewPoll():
         self.poll_sessions = main.poll_sessions
         msg = message.content[6:]
         msg = msg.split(";")
-        if len(msg) < 2: # Needs at least one question and 2 choices
+        if len(msg) < 2:  # Needs at least one question and 2 choices
             self.valid = False
             return None
         else:
@@ -290,8 +338,8 @@ class NewPoll():
         msg.remove(self.question)
         self.answers = {}
         i = 1
-        for answer in msg: # {id : {answer, votes}}
-            self.answers[i] = {"ANSWER" : answer, "VOTES" : 0}
+        for answer in msg:  # {id : {answer, votes}}
+            self.answers[i] = {"ANSWER": answer, "VOTES": 0}
             i += 1
 
     async def start(self):
