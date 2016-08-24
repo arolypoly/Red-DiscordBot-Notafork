@@ -14,6 +14,18 @@ class Remind:
         with open('data.txt', 'w') as outfile:
             json.dump(data, outfile)
 
+    async def parse1(self, potato):
+        await self.bot.say(potato)
+        await self.bot.say(potato[0])
+        await self.bot.say(potato[1])
+        await self.bot.say(potato.index("at", 2, potato.__len__()) + 1)
+        await self.bot.say(potato[(potato.index("at", 2, potato.__len__()) + 1):])
+        await self.bot.say(''.join(str(e) + " " for e in potato[2, potato.__len__()]))
+
+    async def parse2(self, recipient, message, time, meta):
+        data = {"recipient": recipient, "message": message, "time": time, "meta": meta}
+        self.jsonwrite(data)
+
     @commands.command()
     async def jsonread(self):
         await self.bot.say(os.getcwd())
@@ -27,18 +39,6 @@ class Remind:
         author = ctx.message.author
         await self.bot.say("I will remind " + author.mention)
         await self.parse1(poop)
-
-    async def parse1(self, potato):
-        await self.bot.say(potato)
-        await self.bot.say(potato[0])
-        await self.bot.say(potato[1])
-        await self.bot.say(potato.index("at", 2, potato.__len__()) + 1)
-        await self.bot.say(potato[(potato.index("at", 2, potato.__len__()) + 1):])
-        await self.bot.say(''.join(str(e) + " " for e in potato[2, potato.__len__()]))
-
-    async def parse2(self, recipient, message, time, meta):
-        data = {"recipient": recipient, "mesage": message, "time": time, "meta": meta}
-        self.jsonwrite(data)
 
     @commands.command()
     async def pwd(self):
