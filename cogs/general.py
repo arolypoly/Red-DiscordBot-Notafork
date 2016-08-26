@@ -211,12 +211,7 @@ class General:
         await self.bot.say(msg)
 
     @commands.command(pass_context=True, no_pm=True)
-<<<<<<< HEAD
-    async def info(self, ctx, user: discord.Member = None):
-=======
     async def userinfo(self, ctx, user : discord.Member = None):
->>>>>>> f46cc20de7a7b43b6339f6cbe6c23b52e52fdcc0
-        """Shows users's informations"""
         author = ctx.message.author
         server = ctx.message.server
         if not user:
@@ -277,17 +272,12 @@ class General:
         await self.bot.say(data)
 
     @commands.command()
-<<<<<<< HEAD
-    async def urban(self, *, search_terms: str):
-        """Urban Dictionary search"""
-=======
     async def urban(self, *, search_terms : str, definition_number : int=1):
         """Urban Dictionary search
 
         Definition number must be between 1 and 10"""
         # definition_number is just there to show up in the help
         # all this mess is to avoid forcing double quotes on the user
->>>>>>> f46cc20de7a7b43b6339f6cbe6c23b52e52fdcc0
         search_terms = search_terms.split(" ")
         try:
             if len(search_terms) > 1:
@@ -304,12 +294,6 @@ class General:
         try:
             async with aiohttp.get(url) as r:
                 result = await r.json()
-<<<<<<< HEAD
-            if result["list"] != []:
-                definition = result['list'][0]['definition']
-                example = result['list'][0]['example']
-                await self.bot.say("**Definition:** " + definition + "\n\n" + "**Example:** " + example)
-=======
             if result["list"]:
                 definition = result['list'][pos]['definition']
                 example = result['list'][pos]['example']
@@ -320,7 +304,6 @@ class General:
                 msg = pagify(msg, ["\n"])
                 for page in msg:
                     await self.bot.say(page)
->>>>>>> f46cc20de7a7b43b6339f6cbe6c23b52e52fdcc0
             else:
                 await self.bot.say("Your search terms gave no results.")
         except IndexError:
