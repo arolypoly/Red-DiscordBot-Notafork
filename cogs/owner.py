@@ -13,6 +13,7 @@ import datetime
 import glob
 import os
 import time
+import aiohttp
 
 log = logging.getLogger("red.owner")
 
@@ -45,6 +46,10 @@ class Owner:
         self.bot = bot
         self.setowner_lock = False
         self.disabled_commands = fileIO("data/red/disabled_commands.json", "load")
+        self.session = aiohttp.ClientSession(loop=self.bot.loop)
+
+    def __unload(self):
+        self.session.close()
 
     @commands.command()
     @checks.is_owner()
@@ -63,13 +68,15 @@ class Owner:
             log.exception(e)
             traceback.print_exc()
             await self.bot.say("There was an issue loading the module. Check"
-                               " your console or logs for more information.")
+                               " your console or logs for more information.\n"
+                               "\nError: `{}`".format(e.args[0]))
         except Exception as e:
             log.exception(e)
             traceback.print_exc()
             await self.bot.say('Module was found and possibly loaded but '
                                'something went wrong. Check your console '
-                               'or logs for more information.')
+                               'or logs for more information.\n\n'
+                               'Error: `{}`'.format(e.args[0]))
         else:
             set_cog(module, True)
             await self.disable_commands()
@@ -123,7 +130,7 @@ class Owner:
             await self.bot.say("I was unable to unload some cogs: "
                 "{}".format(still_loaded))
         else:
-            await self.bot.say("All cogs are now unloaded.") 
+            await self.bot.say("All cogs are now unloaded.")
 
     @checks.is_owner()
     @commands.command(name="reload")
@@ -149,7 +156,8 @@ class Owner:
             log.exception(e)
             traceback.print_exc()
             await self.bot.say("That module could not be loaded. Check your"
-                               " console or logs for more information.")
+                               " console or logs for more information.\n\n"
+                               "Error: `{}`".format(e.args[0]))
         else:
             set_cog(module, True)
             await self.disable_commands()
@@ -165,11 +173,16 @@ class Owner:
         python = '```py\n{}\n```'
         result = None
 
-        local_vars = locals().copy()
-        local_vars['bot'] = self.bot
+        global_vars = globals().copy()
+        global_vars['bot'] = self.bot
+        global_vars['ctx'] = ctx
+        global_vars['message'] = ctx.message
+        global_vars['author'] = ctx.message.author
+        global_vars['channel'] = ctx.message.channel
+        global_vars['server'] = ctx.message.server
 
         try:
-            result = eval(code, globals(), local_vars)
+            result = eval(code, global_vars, locals())
         except Exception as e:
             await self.bot.say(python.format(type(e).__name__ + ': ' + str(e)))
             return
@@ -212,15 +225,16 @@ class Owner:
                              args=(ctx.message.author,))
         t.start()
 
-    @_set.command()
+    @_set.command(pass_context=True)
     @checks.is_owner()
-    async def prefix(self, *prefixes):
-        """Sets prefixes
+    async def prefix(self, ctx, *prefixes):
+        """Sets Red's prefixes
 
-        Must be separated by a space. Enclose in double
-        quotes if a prefix contains spaces."""
+        Accepts multiple prefixes separated by a space. Enclose in double
+        quotes if a prefix contains spaces.
+        Example: set prefix ! $ ? "two words" """
         if prefixes == ():
-            await self.bot.say("Example: setprefix [ ! ^ .")
+            await send_cmd_help(ctx)
             return
 
         self.bot.command_prefix = sorted(prefixes, reverse=True)
@@ -280,7 +294,7 @@ class Owner:
     async def avatar(self, url):
         """Sets Red's avatar"""
         try:
-            async with self.bot.session.get(url) as r:
+            async with self.session.get(url) as r:
                 data = await r.read()
             await self.bot.edit_profile(settings.password, avatar=data)
             await self.bot.say("Done.")
@@ -302,7 +316,7 @@ class Owner:
             settings.email = token
             settings.password = ""
             await self.bot.say("Token set. Restart me.")
-            log.debug("Just converted to a bot account.")
+            log.debug("Token changed.")
 
     @commands.command()
     @checks.is_owner()
@@ -451,6 +465,35 @@ class Owner:
                     break
             else:
                 break
+
+    @commands.command(pass_context=True)
+    async def contact(self, ctx, *, message : str):
+        """Sends message to the owner"""
+        if settings.owner == "id_here":
+            await self.bot.say("I have no owner set.")
+            return
+        owner = discord.utils.get(self.bot.get_all_members(), id=settings.owner)
+        author = ctx.message.author
+        sender = "From {} ({}):\n\n".format(author, author.id)
+        message = sender + message
+        try:
+            await self.bot.send_message(owner, message)
+        except discord.errors.InvalidArgument:
+            await self.bot.say("I cannot send your message, I'm unable to find"
+                               "my owner... *sigh*")
+        except discord.errors.HTTPException:
+            await self.bot.say("Your message is too long.")
+        except:
+            await self.bot.say("I'm unable to deliver your message. Sorry.")
+
+    @commands.command()
+    async def info(self):
+        """Shows info about Red"""
+        await self.bot.say(
+        "This is an instance of Red, an open source Discord bot created by "
+        "Twentysix and improved by many.\n\n**Github:**\n"
+        "<https://github.com/Twentysix26/Red-DiscordBot/>\n"
+        "**Official server:**\n<https://discord.me/Red-DiscordBot>")
 
     async def leave_confirmation(self, server, owner, ctx):
         if not ctx.message.channel.is_private:
