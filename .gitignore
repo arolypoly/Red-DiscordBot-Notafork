@@ -9,3 +9,4 @@ data
 *.txt
 *.text
 !requirements.txt
+.idea
